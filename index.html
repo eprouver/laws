@@ -1,0 +1,1441 @@
+<html lang="en">
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc= sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ=="
+  crossorigin="anonymous">
+
+  <style>
+    p {
+      padding: 1em;
+    }
+
+    strong {
+      font-weight: bold;
+    }
+
+    .btn {
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <p>
+      <button class="btn btn-default btn-lg" onclick="speechSynthesis.pause(); ">Pause</button>
+      <button class="btn btn-default btn-lg" onclick="speechSynthesis.pause(); speechSynthesis.resume()">Resume</button>
+      <button class="btn btn-default btn-lg" onclick="topicsubtopiccase()">Next</button>
+      <button id="testbtn" class="btn btn-default btn-lg pull-right" onclick="test()">Test</button>
+    </p>
+    <p onclick="$(this).hide(1000)">Source: <a href="https://en.wikipedia.org/wiki/List_of_landmark_court_decisions_in_the_United_States">List of landmark court decisions in the United States</a></p>
+    <br/>
+
+    <div id="output">
+      <p onclick="$(this).hide(1000)" class="alert alert-info">You will hear 5 court cases presented randomly.  Once you think you know them, press test.</p>
+    </div>
+
+    <div id="tester" class="row" style="display:none">
+      <p onclick="$(this).hide(1000)" class="alert alert-info">Drag trials to their descriptions. Answer correctly and get a new case!</p>
+      <div id="names" class="col-xs-6"></div>
+      <div id="descrips" class="col-xs-6"></div>
+    </div>
+  </div>
+
+  <script>
+    var allcases = [{
+      "name": "Individual rights",
+      "cases": [{
+        "title": "Dred Scott v. Sandford",
+        "location": "60 U.S. 393 (1857)voided",
+        "text": "People of African descent that are slaves or were slaves and subsequently freed, along with their descendants, cannot be United States citizens. Consequently, they cannot sue in federal court. Also, slavery cannot be outlawed in the western territories before they access statehood. After the Civil War, this decision was  by the Thirteenth and Fourteenth Amendments to the Constitution.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Civil Rights Cases",
+        "location": "109 U.S. 3 (1883)",
+        "text": "Neither the Thirteenth nor the Fourteenth Amendment empower Congress to safeguard blacks against the actions of private individuals.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Plessy v. Ferguson",
+        "location": "163 U.S. 537 (1896)Overruled",
+        "text": "Segregated facilities for blacks and whites are constitutional under the doctrine of separate but equal, which holds for close to 60 years. ( by Brown v. Board of Education (1954))",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Smith v. Allwright",
+        "location": "321 U.S. 649 (1944)",
+        "text": "Primary elections must be open to voters of all races.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Korematsu v. United States",
+        "location": "323 U.S. 214 (1944)",
+        "text": "President Franklin D. Roosevelt's Executive Order 9066 is constitutional; therefore, American citizens of Japanese descent can be interned and deprived of their basic constitutional rights. This case featured the first application of strict scrutiny to racial discrimination by the government.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Morgan v. Virginia",
+        "location": "328 U.S. 373 (1946)",
+        "text": "A Virginia law that enforces segregation on interstate buses is unconstitutional.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Shelley v. Kraemer",
+        "location": "334 U.S. 1 (1948)",
+        "text": "Courts may not enforce racial covenants on real estate.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Henderson v. United States",
+        "location": "339 U.S. 816 (1950)",
+        "text": "The Interstate Commerce Act of 1887 makes it unlawful for a railroad that engages in interstate commerce to subject any particular person to any undue or unreasonable prejudice or disadvantage in any respect whatsoever.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Brown v. Board of Education",
+        "location": "347 U.S. 483 (1954)",
+        "text": "Segregated schools in the states are unconstitutional because they violate the Equal Protection Clause of the Fourteenth Amendment. The Court found that the separate but equal doctrine adopted in Plessy v. Ferguson (1896) \"has no place in the field of public education.\"",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Bolling v. Sharpe",
+        "location": "347 U.S. 497 (1954)",
+        "text": "Segregated schools in the District of Columbia violate the Due Process Clause of the Fifth Amendment.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Sarah Keys v. Carolina Coach Company",
+        "location": "64 MCC 769 (1955)",
+        "text": "According to the Interstate Commerce Commission, the non-discrimination language of the Interstate Commerce Act of 1887 bans racial segregation on buses traveling across state lines. The Supreme Court later adopted and expanded this decision in Boynton v. Virginia (1960).",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Browder v. Gayle",
+        "location": "142 F. Supp. 707 (M.D. Ala. 1956)",
+        "text": "Bus segregation is unconstitutional under the Equal Protection Clause.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Gomillion v. Lightfoot",
+        "location": "364 U.S. 339 (1960)",
+        "text": "Electoral district boundaries drawn only to disenfranchise blacks violate the Fifteenth Amendment.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Boynton v. Virginia",
+        "location": "364 U.S. 454 (1960)",
+        "text": "Racial segregation in all forms of public transportation is illegal under the Interstate Commerce Act of 1887.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Garner v. Louisiana",
+        "location": "368 U.S. 157 (1961)",
+        "text": "Peaceful sit-in demonstrators protesting segregationist policies cannot be arrested under a state's \"disturbing the peace\" laws.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Loving v. Virginia",
+        "location": "388 U.S. 1 (1967)",
+        "text": "Laws that prohibit interracial marriage (anti-miscegenation laws) are unconstitutional.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Jones v. Alfred H. Mayer Co.",
+        "location": "392 U.S. 409 (1968)",
+        "text": "The federal government may prohibit discrimination in housing by private parties under the Civil Rights Act of 1968.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Swann v. Charlotte-Mecklenburg Board of Education",
+        "location": "402 U.S. 1 (1971)",
+        "text": "The busing of students to promote racial integration in public schools is constitutional.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Gates v. Collier",
+        "location": "501 F. 2d 1291 (5th Cir. 1974)",
+        "text": "This decision brought an end to the trusty system and flagrant inmate abuse at the Mississippi State Penitentiary in Parchman, Mississippi. It was the first body of law developed in the Fifth Circuit that abolished racial segregation in prisons and held that a variety of forms of corporal punishment against prisoners is considered cruel and unusual punishment in violation of the Eighth Amendment.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Regents of the University of California v. Bakke",
+        "location": "438 U.S. 265 (1978)",
+        "text": "Race-based set-asides in educational opportunities violate the Equal Protection Clause. This decision leaves the door open for the possibility of some use of race in admission decisions.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Batson v. Kentucky",
+        "location": "476 U.S. 79 (1986)",
+        "text": "Prosecutors may not use peremptory challenges to dismiss jurors based on their race.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Adarand Constructors, Inc. v. Peña",
+        "location": "515 U.S. 200 (1995)",
+        "text": "Race-based discrimination, including discrimination in favor of minorities (affirmative action), must pass strict scrutiny.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Grutter v. Bollinger",
+        "location": "539 U.S. 306 (2003)",
+        "text": "A narrowly tailored use of race in student admission decisions may be permissible under the Equal Protection Clause because a diverse student body is beneficial to all students. This was hinted at in Regents v. Bakke (1978).",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Schuette v. Coalition to Defend Affirmative Action",
+        "location": "572 U.S. ___ (2014)",
+        "text": "A Michigan state constitutional amendment that bans affirmative action does not violate the Equal Protection Clause.",
+        "subgroup": "Discrimination based on race and ethnicity"
+      }, {
+        "title": "Muller v. Oregon",
+        "location": "208 U.S. 412 (1908)",
+        "text": "Oregon's restrictions on the working hours of women are constitutional under the Fourteenth Amendment because they are justified by the strong state interest in protecting women's health.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "Phillips v. Martin Marietta Corp.",
+        "location": "400 U.S. 542 (1971)",
+        "text": "An employer may not, in the absence of business necessity, refuse to hire women with preschool-age children while hiring men with such children.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "Reed v. Reed",
+        "location": "404 U.S. 71 (1971)",
+        "text": "Administrators of estates cannot be named in a way that discriminates on the basis of sex.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "Frontiero v. Richardson",
+        "location": "411 U.S. 677 (1973)",
+        "text": "Sex-based discriminations are inherently suspect. A statute that gives benefits to the spouses of male members of the uniformed services, but not to the spouses of female members, (on the assumption that only the former are dependent) is unconstitutional.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "Craig v. Boren",
+        "location": "429 U.S. 190 (1976)",
+        "text": "Setting different minimum ages for females (18) and males (21) to be allowed to buy beer is unconstitutional sex-based discrimination contrary to the Equal Protection Clause of the Fourteenth Amendment.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "J.E.B. v. Alabama ex rel. T.B.",
+        "location": "511 U.S. 127 (1994)",
+        "text": "Prosecutors may not use peremptory challenges to dismiss jurors based on their sex.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "United States v. Virginia",
+        "location": "518 U.S. 515 (1996)",
+        "text": "Sex-based \"separate but equal\" military training facilities violate the Equal Protection Clause.",
+        "subgroup": "Discrimination based on sex"
+      }, {
+        "title": "Bowers v. Hardwick",
+        "location": "478 U.S. 186 (1986)Overruled",
+        "text": "A Georgia law that criminalizes certain acts of private sexual conduct between homosexual persons does not violate the Fourteenth Amendment. ( by Lawrence v. Texas (2003))",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "Romer v. Evans",
+        "location": "517 U.S. 620 (1996)",
+        "text": "A Colorado state constitutional amendment that prevents homosexuals and bisexuals from being able to obtain protections under the law is a violation of the Equal Protection Clause of the Fourteenth Amendment.",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "Lawrence v. Texas",
+        "location": "539 U.S. 558 (2003)",
+        "text": "A Texas law that criminalizes consensual same-sex sexual conduct furthers no legitimate state interest and violates homosexuals' right to privacy under the Due Process Clause of the Fourteenth Amendment. This decision invalidates all of the remaining sodomy laws in the United States.",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "Goodridge v. Department of Public Health",
+        "location": "440 Mass. 309 (2003)",
+        "text": "The denial of marriage licenses to same-sex couples violates provisions of the state constitution guaranteeing individual liberty and equality and is not rationally related to a legitimate state interest. This was the first state court decision in which same-sex couples won the right to marry.",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "United States v. Windsor",
+        "location": "570 U.S. ___ (2013)",
+        "text": "Section 3 of the Defense of Marriage Act, which defines—for federal law purposes—the terms \"marriage\" and \"spouse\" to apply only to marriages between one man and one woman, is a deprivation of the equal liberty of the person protected by the Due Process Clause of the Fifth Amendment. The federal government must recognize same-sex marriages that have been approved by the states.",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "Obergefell v. Hodges",
+        "location": "576 U.S. ___ (2015)",
+        "text": "The Fourteenth Amendment requires a state to license a marriage between two people of the same sex and to recognize a marriage between two people of the same sex when their marriage was lawfully licensed and performed out-of-state.",
+        "subgroup": "Discrimination based on sexual orientation"
+      }, {
+        "title": "Griswold v. Connecticut",
+        "location": "381 U.S. 479 (1965)",
+        "text": "A Connecticut law that criminalizes the use of contraception by married couples is unconstitutional because all Americans have a constitutionally protected right to privacy.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Eisenstadt v. Baird",
+        "location": "405 U.S. 438 (1972)",
+        "text": "A Massachusetts law that criminalizes the use of contraception by unmarried couples violates the right to privacy established in Griswold as well as the Equal Protection Clause of the Fourteenth Amendment.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Roe v. Wade",
+        "location": "410 U.S. 113 (1973)",
+        "text": "Laws that restrict a woman's ability to have an abortion prior to viability are unconstitutional. Most restrictions during the first trimester are prohibited, and only health-related restrictions are permitted during the second trimester.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Carey v. Population Services International",
+        "location": "431 U.S. 678 (1977)",
+        "text": "Laws that restrict the sale, distribution, and advertisement of contraceptives to both adults and minors are unconstitutional.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Planned Parenthood v. Casey",
+        "location": "505 U.S. 833 (1992)",
+        "text": "A woman is still able to have an abortion before viability, but several restrictions are now permitted during the first trimester. The strict trimester framework of Roe is discarded and replaced with the more vague \"undue burden\" test.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Stenberg v. Carhart",
+        "location": "530 U.S. 914 (2000)",
+        "text": "Laws that ban partial-birth abortion are unconstitutional if they do not make an exception for the woman's health or if they cannot be reasonably construed to apply only to the partial-birth abortion procedure and not to other abortion methods.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Gonzales v. Carhart",
+        "location": "550 U.S. 124 (2007)",
+        "text": "The Partial-Birth Abortion Ban Act of 2003 is constitutional because it is less ambiguous than the law that was struck down in Stenberg. It is not vague or overbroad, and it does not impose an undue burden on a woman's right to choose to have an abortion.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Burwell v. Hobby Lobby Stores, Inc.",
+        "location": "573 U.S. ___ (2014)",
+        "text": "Closely held, for-profit corporations have free exercise rights under the Religious Freedom Restoration Act of 1993. As applied to such corporations, the requirement of the Patient Protection and Affordable Care Act that employers provide their female employees with no-cost access to contraception violates the Religious Freedom Restoration Act.",
+        "subgroup": "Birth control and abortion"
+      }, {
+        "title": "Cruzan v. Director, Missouri Department of Health",
+        "location": "497 U.S. 261 (1990)",
+        "text": "When a family has requested the termination of life-sustaining treatments for their vegetative relative, the state may constitutionally oppose this request if there is a lack of evidence of a clear earlier wish by said relative.",
+        "subgroup": "End of life"
+      }, {
+        "title": "Washington v. Glucksberg",
+        "location": "521 U.S. 702 (1997)",
+        "text": "Washington's prohibition on assisted suicide is constitutional.",
+        "subgroup": "End of life"
+      }, {
+        "title": "Vacco v. Quill",
+        "location": "521 U.S. 793 (1997)",
+        "text": "New York's prohibition on assisted suicide does not violate the Equal Protection Clause.",
+        "subgroup": "End of life"
+      }, {
+        "title": "Gonzales v. Oregon",
+        "location": "546 U.S. 243 (2006)",
+        "text": "The Controlled Substances Act does not prevent physicians from being able to prescribe the drugs needed to perform assisted suicides under state law.",
+        "subgroup": "End of life"
+      }, {
+        "title": "Heart of Atlanta Motel, Inc. v. United States",
+        "location": "379 U.S. 241 (1964)",
+        "text": "The Civil Rights Act of 1964 applies to places of public accommodation patronized by interstate travelers by reason of the Commerce Clause.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "Katzenbach v. McClung",
+        "location": "379 U.S. 294 (1964)",
+        "text": "The power of Congress to regulate interstate commerce extends to a restaurant that is not patronized by interstate travelers but which serves food that has moved in interstate commerce. This ruling makes the Civil Rights Act of 1964 apply to virtually all businesses.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "South Carolina v. Katzenbach",
+        "location": "383 U.S. 301 (1966)",
+        "text": "The Voting Rights Act of 1965 is a valid exercise of Congress's power under Section 2 of the Fifteenth Amendment.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "Katzenbach v. Morgan",
+        "location": "384 U.S. 641 (1966)",
+        "text": "Congress may enact laws stemming from Section 5 of the Fourteenth Amendment that increase the rights of citizens beyond what the judiciary has recognized.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "City of Boerne v. Flores",
+        "location": "521 U.S. 507 (1997)",
+        "text": "Section 5 of the Fourteenth Amendment does not permit Congress to substantially increase the scope of the rights determined by the judiciary. Congress may only enact remedial or preventative measures that are consistent with the Fourteenth Amendment interpretations of the Supreme Court.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "Shelby County v. Holder",
+        "location": "570 U.S. ___ (2013)",
+        "text": "Section 4(b) of the Voting Rights Act of 1965, which contains the coverage formula that determines which state and local jurisdictions are subjected to federal preclearance from the Department of Justice before implementing any changes to their voting laws or practices based on their histories of racial discrimination in voting, is unconstitutional because it no longer reflects current societal conditions.",
+        "subgroup": "Power of Congress to enforce civil rights"
+      }, {
+        "title": "Corfield v. Coryell",
+        "location": "6 Fed. Cas. 546 (C.C.E.D. Pa. 1823)",
+        "text": "Some of the rights protected by the Privileges and Immunities Clause include the freedom of movement through the states, the right of access to the courts, the right to purchase and hold property, an exemption from higher taxes than those paid by state residents, and the right to vote.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "Ex parte Milligan",
+        "location": "71 U.S. 2 (1866)",
+        "text": "Trying citizens in military courts is unconstitutional when civilian courts are still operating. Trial by military tribunal is constitutional only when there is no power left but the military, and the military may validly try criminals only as long as is absolutely necessary.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "Crandall v. Nevada",
+        "location": "73 U.S. 35 (1868)",
+        "text": "The freedom of movement is a fundamental right; a state cannot inhibit people from leaving the state by taxing them.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "United States v. Wong Kim Ark",
+        "location": "169 U.S. 649 (1898)",
+        "text": "With only a few narrow exceptions, every person born in the United States acquires United States citizenship at birth via the Citizenship Clause of the Fourteenth Amendment.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "United States v. Wheeler",
+        "location": "254 U.S. 281 (1920)",
+        "text": "The Constitution grants to the states the power to prosecute individuals for wrongful interference with the right to travel.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "Reid v. Covert",
+        "location": "354 U.S. 1 (1957)",
+        "text": "United States citizens abroad, even when associated with the military, cannot be deprived of the protections of the Constitution and cannot be made subject to military jurisdiction.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "United States v. Guest",
+        "location": "383 U.S. 745 (1966)",
+        "text": "There is a constitutional right to travel from state to state, and the protections of the Fourteenth Amendment extend to citizens who suffer rights deprivations at the hands of private conspiracies where there is minimal state participation in the conspiracy.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "Afroyim v. Rusk",
+        "location": "387 U.S. 253 (1967)",
+        "text": "The right of citizenship is protected by the Citizenship Clause of the Fourteenth Amendment. Congress has no power under the Constitution to revoke a person's United States citizenship unless he or she voluntarily relinquishes it.",
+        "subgroup": "Other areas"
+      }, {
+        "title": "O'Connor v. Donaldson",
+        "location": "422 U.S. 563 (1975)",
+        "text": "The states cannot involuntarily commit individuals if they are not a danger to themselves or others and are capable of living by themselves or with the aid of responsible family members or friends.",
+        "subgroup": "Other areas"
+      }]
+    }, {
+      "name": "Criminal law",
+      "cases": [{
+        "title": "Mapp v. Ohio",
+        "location": "367 U.S. 643 (1961)",
+        "text": "Evidence that is obtained in violation of the Fourth Amendment is inadmissible in state court.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Schmerber v. California",
+        "location": "384 U.S. 757 (1966)",
+        "text": "The application of the Fourth Amendment's protection against warrantless searches and the Fifth Amendment privilege against self incrimination to searches that intrude into the human body means that police may not conduct warrantless blood testing on suspects absent an emergency that justifies acting without a warrant.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Katz v. United States",
+        "location": "389 U.S. 347 (1967)",
+        "text": "The Fourth Amendment's ban on unreasonable searches and seizures applies to all places where an individual has a \"reasonable expectation of privacy.\"",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Terry v. Ohio",
+        "location": "392 U.S. 1 (1968)",
+        "text": "Police may stop a person if they have a reasonable suspicion that the person has committed or is about to commit a crime and frisk the suspect for weapons if they have a reasonable suspicion that the suspect is armed and dangerous without violating the Fourth Amendment.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Bivens v. Six Unknown Named Agents",
+        "location": "403 U.S. 388 (1971)",
+        "text": "Individuals may sue federal government officials who have violated their Fourth Amendment rights even though such a suit is not authorized by law. The existence of a remedy for the violation is implied from the importance of the right that is violated.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "United States v. United States District Court for the Eastern District of Michigan",
+        "location": "407 U.S. 297 (1972)",
+        "text": "Government officials must obtain a warrant before beginning electronic surveillance even if domestic security issues are involved. The \"inherent vagueness of the domestic security concept\" and the potential for abusing it to quell political dissent make the Fourth Amendment's protections especially important when the government engages in spying on its own citizens.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Illinois v. Gates",
+        "location": "462 U.S. 213 (1983)",
+        "text": "The totality of the circumstances, rather than a rigid test, must be used in finding probable cause under the Fourth Amendment.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "New Jersey v. T. L. O.",
+        "location": "469 U.S. 325 (1985)",
+        "text": "The Fourth Amendment's ban on unreasonable searches applies to those conducted by public school officials as well as those conducted by law enforcement personnel, but public school officials can use the less strict standard of reasonable suspicion instead of probable cause.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Vernonia School District 47J v. Acton",
+        "location": "515 U.S. 646 (1995)",
+        "text": "Schools may implement random drug testing upon students participating in school-sponsored athletics.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Board of Education v. Earls",
+        "location": "536 U.S. 822 (2002)",
+        "text": "Coercive drug testing imposed by school districts upon students who participate in extracurricular activities does not violate the Fourth Amendment.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Georgia v. Randolph",
+        "location": "547 U.S. 103 (2006)",
+        "text": "Police cannot conduct a warrantless search in a home where one occupant consents and the other objects.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "In re Directives",
+        "location": "(2008)",
+        "text": "According to the United States Foreign Intelligence Surveillance Court of Review, an exception to the Fourth Amendment’s warrant requirement exists when surveillance is conducted to obtain foreign intelligence for national security purposes and is directed against foreign powers or agents of foreign powers reasonably believed to be located outside the United States.[1]",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "United States v. Jones",
+        "location": "565 U.S. ___ (2012)",
+        "text": "Attaching a GPS device to a vehicle and then using the device to monitor the vehicle’s movements constitutes a search under the Fourth Amendment.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Riley v. California",
+        "location": "573 U.S. ___ (2014)",
+        "text": "Police must obtain a warrant in order to search digital information on a cell phone seized from an individual who has been arrested.",
+        "subgroup": "Freedom from unreasonable searches and seizures"
+      }, {
+        "title": "Glasser v. United States",
+        "location": "315 U.S. 60 (1942)",
+        "text": "A defense lawyer's conflict of interest arising from a simultaneous representation of codefendants violates the Assistance of Counsel Clause of the Sixth Amendment.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Betts v. Brady",
+        "location": "316 U.S. 455 (1942)Overruled",
+        "text": "Indigent defendants may be denied counsel when prosecuted by a state. ( by Gideon v. Wainwright (1963))",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Gideon v. Wainwright",
+        "location": "372 U.S. 335 (1963)",
+        "text": "All defendants have the right to an attorney and must be provided one by the state if they are unable to afford legal counsel.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Escobedo v. Illinois",
+        "location": "378 U.S. 478 (1964)",
+        "text": "A person in police custody has the right to speak to an attorney.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Miranda v. Arizona",
+        "location": "384 U.S. 436 (1966)",
+        "text": "Police must advise criminal suspects of their rights under the Constitution to remain silent, to consult with a lawyer, and to have one appointed to them if they are indigent. A police interrogation must stop if the suspect states that he or she wishes to remain silent.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "In re Gault",
+        "location": "387 U.S. 1 (1967)",
+        "text": "Juvenile defendants are protected under the Due Process Clause of the Fourteenth Amendment.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Michigan v. Jackson",
+        "location": "475 U.S. 625 (1986)Overruled",
+        "text": "If a police interrogation begins after a defendant asserts his or her right to counsel at an arraignment or similar proceeding, then any waiver of that right for that police-initiated interrogation is invalid. ( by Montejo v. Louisiana (2009))",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Montejo v. Louisiana",
+        "location": "556 U.S. 778 (2009)",
+        "text": "A defendant may waive his or her right to counsel during a police interrogation even if the interrogation begins after the defendant's assertion of his or her right to counsel at an arraignment or similar proceeding.",
+        "subgroup": "Right to an attorney"
+      }, {
+        "title": "Strickland v. Washington",
+        "location": "466 U.S. 668 (1984)",
+        "text": "To obtain relief due to ineffective assistance of counsel, a criminal defendant must show that counsel's performance fell below an objective standard of reasonableness and that counsel's deficient performance gives rise to a reasonable probability that, if counsel had performed adequately, the result of the proceeding would have been different.",
+        "subgroup": "Other rights regarding counsel"
+      }, {
+        "title": "Padilla v. Kentucky",
+        "location": "559 U.S. 356 (2010)",
+        "text": "Criminal defense attorneys are duty-bound to inform clients of the risk of deportation under three circumstances. First, where the law is unambiguous, attorneys must advise their criminal clients that deportation \"will\" result from a conviction. Second, where the immigration consequences of a conviction are unclear or uncertain, attorneys must advise that deportation \"may\" result. Finally, attorneys must give their clients some advice about deportation—counsel cannot remain silent about immigration consequences.",
+        "subgroup": "Other rights regarding counsel"
+      }, {
+        "title": "Berghuis v. Thompkins",
+        "location": "560 U.S. 370 (2010)",
+        "text": "The right to remain silent does not exist unless a suspect invokes it unambiguously.",
+        "subgroup": "Right to remain silent"
+      }, {
+        "title": "Salinas v. Texas",
+        "location": "570 U.S. ___ (2013)",
+        "text": "The Fifth Amendment's protection against self-incrimination does not protect an individual's refusal to answer questions asked by law enforcement before he or she has been arrested or given the Miranda warning. A witness cannot invoke the privilege by simply standing mute; he or she must expressly invoke it.",
+        "subgroup": "Right to remain silent"
+      }, {
+        "title": "Dusky v. United States",
+        "location": "362 U.S. 402 (1960)",
+        "text": "A defendant has the right to a competency evaluation before proceeding to trial.",
+        "subgroup": "Competence"
+      }, {
+        "title": "Rogers v. Okin",
+        "location": "478 F. Supp. 1342 (D. Mass. 1979)",
+        "text": "The competence of a committed patient is presumed until he or she is adjudicated incompetent.",
+        "subgroup": "Competence"
+      }, {
+        "title": "Ford v. Wainwright",
+        "location": "477 U.S. 399 (1986)",
+        "text": "A defendant has the right to a competency evaluation before being executed.",
+        "subgroup": "Competence"
+      }, {
+        "title": "Godinez v. Moran",
+        "location": "509 U.S. 389 (1993)",
+        "text": "A defendant who is competent to stand trial is automatically competent to plead guilty or waive the right to legal counsel.",
+        "subgroup": "Competence"
+      }, {
+        "title": "Rasul v. Bush",
+        "location": "542 U.S. 466 (2004)",
+        "text": "The federal court system has the authority to decide if foreign nationals held at Guantanamo Bay were wrongfully imprisoned.",
+        "subgroup": "Detainment of terrorism suspects"
+      }, {
+        "title": "Hamdi v. Rumsfeld",
+        "location": "542 U.S. 507 (2004)",
+        "text": "The federal government has the power to detain those it designates as enemy combatants, including United States citizens, but detainees that are United States citizens must have the rights of due process and the ability to challenge their enemy combatant status before an impartial authority.",
+        "subgroup": "Detainment of terrorism suspects"
+      }, {
+        "title": "Hamdan v. Rumsfeld",
+        "location": "548 U.S. 557 (2006)",
+        "text": "The military commissions set up by the Bush administration to try detainees at Guantanamo Bay are illegal because they lack the protections that are required by the Geneva Conventions and the Uniform Code of Military Justice.",
+        "subgroup": "Detainment of terrorism suspects"
+      }, {
+        "title": "Boumediene v. Bush",
+        "location": "553 U.S. 723 (2008)",
+        "text": "Foreign terrorism suspects held at Guantanamo Bay have the constitutional right to challenge their detention in United States courts.",
+        "subgroup": "Detainment of terrorism suspects"
+      }, {
+        "title": "Furman v. Georgia",
+        "location": "408 U.S. 238 (1972)",
+        "text": "The arbitrary and inconsistent imposition of the death penalty violates the Eighth and Fourteenth Amendments and constitutes cruel and unusual punishment. This decision initiates a nationwide de facto moratorium on executions that lasts until the Supreme Court's decision in Gregg v. Georgia (1976).",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Gregg v. Georgia",
+        "location": "428 U.S. 153 (1976)",
+        "text": "Georgia's new death penalty statute is constitutional because it adequately narrows the class of defendants eligible for the death penalty. This case and the next four cases were consolidated and decided simultaneously. By evaluating the new death penalty statutes that had been passed by the states, the Supreme Court ended the moratorium on executions that began with its decision in Furman v. Georgia (1972).",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Proffitt v. Florida",
+        "location": "428 U.S. 242 (1976)",
+        "text": "Florida's new death penalty statute is constitutional because it requires the comparison of aggravating factors to mitigating factors in order to impose a death sentence.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Jurek v. Texas",
+        "location": "428 U.S. 262 (1976)",
+        "text": "Texas's new death penalty statute is constitutional because it uses a three-part test to determine if a death sentence should be imposed.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Woodson v. North Carolina",
+        "location": "428 U.S. 280 (1976)",
+        "text": "North Carolina's new death penalty statute is unconstitutional because it allows a mandatory death sentence to be imposed.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Roberts v. Louisiana",
+        "location": "428 U.S. 325 (1976)",
+        "text": "Louisiana's new death penalty statute is unconstitutional because it calls for a mandatory death sentence for a large range of crimes.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Coker v. Georgia",
+        "location": "433 U.S. 584 (1977)",
+        "text": "A death sentence may not be imposed for the crime of rape.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Enmund v. Florida",
+        "location": "458 U.S. 782 (1982)",
+        "text": "A death sentence may not be imposed on offenders who are involved in a felony during which a murder is committed but who do not actually kill, attempt to kill, or intend that a killing take place.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Ford v. Wainwright",
+        "location": "477 U.S. 399 (1986)",
+        "text": "A death sentence may not be imposed on the insane.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Breard v. Greene",
+        "location": "523 U.S. 371 (1998)",
+        "text": "The International Court of Justice does not have jurisdiction in capital punishment cases that involve foreign nationals.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Atkins v. Virginia",
+        "location": "536 U.S. 304 (2002)",
+        "text": "A death sentence may not be imposed on mentally retarded offenders, but the states can define what it means to be mentally retarded.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Roper v. Simmons",
+        "location": "543 U.S. 551 (2005)",
+        "text": "A death sentence may not be imposed on juvenile offenders.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Baze v. Rees",
+        "location": "553 U.S. 35 (2008)",
+        "text": "The three-drug cocktail used for performing executions by lethal injection in Kentucky (as well as virtually all of the states using lethal injection at the time) is constitutional under the Eighth Amendment.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Kennedy v. Louisiana",
+        "location": "554 U.S. 407 (2008)",
+        "text": "The death penalty is unconstitutional in all cases that do not involve murder or crimes against the state such as treason.",
+        "subgroup": "Capital punishment"
+      }, {
+        "title": "Apprendi v. New Jersey",
+        "location": "530 U.S. 466 (2000)",
+        "text": "Other than the fact of a prior conviction, any fact that increases the penalty for a crime beyond the prescribed statutory maximum must be submitted to a jury and proved beyond a reasonable doubt.",
+        "subgroup": "Other criminal sentences"
+      }, {
+        "title": "Graham v. Florida",
+        "location": "560 U.S. 48 (2010)",
+        "text": "A sentence of life imprisonment without the possibility of parole may not be imposed on juvenile non-homicide offenders.",
+        "subgroup": "Other criminal sentences"
+      }, {
+        "title": "Miller v. Alabama",
+        "location": "567 U.S. ___ (2012)",
+        "text": "A sentence of life imprisonment without the possibility of parole may not be a mandatory sentence for juvenile offenders.",
+        "subgroup": "Other criminal sentences"
+      }]
+    }, {
+      "name": "Federalism",
+      "cases": [{
+        "title": "Chisholm v. Georgia",
+        "location": "2 U.S. 419 (1793)voided",
+        "text": "The Constitution prevents the states from exercising sovereign immunity. Therefore, the states can be sued in federal court by citizens of other states. This decision was  by the Eleventh Amendment in 1795, just two years after it was handed down."
+      }, {
+        "title": "Hylton v. United States",
+        "location": "3 U.S. 171 (1796)",
+        "text": "A tax on the possession of goods is not a direct tax that must be apportioned among the states according to their populations. This case featured the first example of judicial review by the Supreme Court."
+      }, {
+        "title": "Ware v. Hylton",
+        "location": "3 U.S. 199 (1796)",
+        "text": "A section of the Treaty of Paris supersedes an otherwise valid Virginia statute under the Supremacy Clause. This case featured the first example of judicial nullification of a state law."
+      }, {
+        "title": "Marbury v. Madison",
+        "location": "5 U.S. 137 (1803)",
+        "text": "Section 13 of the Judiciary Act of 1789 is unconstitutional because it attempts to expand the original jurisdiction of the Supreme Court beyond that permitted by the Constitution. Congress cannot pass laws that contradict the Constitution. This case featured the first example of judicial nullification of a federal law."
+      }, {
+        "title": "Fletcher v. Peck",
+        "location": "10 U.S. 87 (1810)",
+        "text": "A state legislature can repeal a corruptly made law, but the Contract Clause of the Constitution prohibits the voiding of valid contracts made under such a law. This was the first case in which the Supreme Court struck down a state law as unconstitutional."
+      }, {
+        "title": "Martin v. Hunter's Lessee",
+        "location": "14 U.S. 304 (1816)",
+        "text": "Federal courts may review state court decisions when they rest on federal law or the federal Constitution. This decision provides for the uniform interpretation of federal law throughout the states."
+      }, {
+        "title": "McCulloch v. Maryland",
+        "location": "17 U.S. 316 (1819)",
+        "text": "The Necessary and Proper Clause of the Constitution grants to Congress implied powers for implementing the Constitution's express powers, and state actions may not impede valid exercises of power by the federal government."
+      }, {
+        "title": "Gibbons v. Ogden",
+        "location": "22 U.S. 1 (1824)",
+        "text": "The power to regulate interstate navigation is granted to Congress by the Commerce Clause of the Constitution."
+      }, {
+        "title": "Barron v. Baltimore",
+        "location": "32 U.S. 243 (1833)",
+        "text": "The Bill of Rights cannot be applied to the state governments. This decision has essentially been rendered moot by the Supreme Court's adoption of the incorporation doctrine, which uses the Due Process Clause of the Fourteenth Amendment to apply portions of the Bill of Rights to the states."
+      }, {
+        "title": "Cooley v. Board of Wardens",
+        "location": "53 U.S. 299 (1852)",
+        "text": "When local circumstances make it necessary the states can regulate interstate commerce as long as such regulations do not conflict with federal law. State laws related to commerce powers can be valid if Congress is silent on the matter."
+      }, {
+        "title": "Ableman v. Booth",
+        "location": "62 U.S. 506 (1859)",
+        "text": "State courts cannot issue rulings that contradict the decisions of federal courts."
+      }, {
+        "title": "Texas v. White",
+        "location": "74 U.S. 700 (1869)",
+        "text": "The states that formed the Confederate States of America during the Civil War never actually left the Union because a state cannot unilaterally secede from the United States."
+      }, {
+        "title": "Pollock v. Farmers' Loan & Trust Co.",
+        "location": "157 U.S. 429 (1895)voided",
+        "text": "Income taxes on interest, dividends, and rents are, in effect, direct taxes that must be apportioned among the states according to their populations. This decision was  by the Sixteenth Amendment in 1913, allowing income taxes to be implemented without apportionment."
+      }, {
+        "title": "Swift and Company v. United States",
+        "location": "196 U.S. 375 (1905)Superseded",
+        "text": "Congress can prohibit local business practices in order to regulate interstate commerce because those practices, when combined together, form a \"stream of commerce\" between the states. ( by National Labor Relations Board v. Jones & Laughlin Steel Corporation (1937))"
+      }, {
+        "title": "Ex parte Young",
+        "location": "209 U.S. 123 (1908)",
+        "text": "Sovereign immunity cannot be used to bar suits against state officials for injunctive relief under the Constitution when said officials were not acting on behalf of the state when they sought to enforce an unconstitutional law."
+      }, {
+        "title": "Missouri v. Holland",
+        "location": "252 U.S. 416 (1920)",
+        "text": "Treaties made by the federal government are supreme over any concerns brought by the states about such treaties interfering with any states' rights derived from the Tenth Amendment."
+      }, {
+        "title": "United States v. Wheeler",
+        "location": "254 U.S. 281 (1920)",
+        "text": "The Constitution grants to the states the power to prosecute individuals for wrongful interference with the right to travel."
+      }, {
+        "title": "J. W. Hampton, Jr. & Co. v. United States",
+        "location": "276 U.S. 394 (1928)",
+        "text": "The Separation of Powers can be side-stepped if Congress provides an \"intelligible principle\" to guide the executive branch."
+      }, {
+        "title": "National Labor Relations Board v. Jones & Laughlin Steel Corporation",
+        "location": "301 U.S. 1 (1937)",
+        "text": "The National Labor Relations Act and, by extension, the National Labor Relations Board are constitutional because the Commerce Clause applies to labor relations. Therefore, the NLRB has the right to sanction companies that fire or discriminate against workers for belonging to a union. Also, a local commercial activity that is considered in isolation may still constitute interstate commerce if that activity has a \"close and substantial relationship\" to interstate commerce."
+      }, {
+        "title": "Steward Machine Company v. Davis",
+        "location": "301 U.S. 548 (1937)",
+        "text": "The federal government is permitted to impose a tax even if the goal of the tax is not just the collection of revenue."
+      }, {
+        "title": "United States v. Darby Lumber Co.",
+        "location": "312 U.S. 100 (1941)",
+        "text": "Control over interstate commerce belongs entirely to Congress. The Fair Labor Standards Act of 1938 is constitutional under the Commerce Clause because it prevents the states from lowering labor standards to gain commercial advantages."
+      }, {
+        "title": "Wickard v. Filburn",
+        "location": "317 U.S. 111 (1942)",
+        "text": "The Commerce Clause of the Constitution allows Congress to regulate anything that has a substantial economic effect on commerce even if that effect is indirect."
+      }, {
+        "title": "Cooper v. Aaron",
+        "location": "358 U.S. 1 (1958)",
+        "text": "The states are bound by the decisions of the Supreme Court and cannot choose to ignore them."
+      }, {
+        "title": "Oregon v. Mitchell",
+        "location": "400 U.S. 112 (1970)",
+        "text": "Congress has the power to regulate requirements for voting in federal elections, but it is prohibited from regulating requirements for voting in state and local elections. This decision led to the ratification of the Twenty-sixth Amendment in 1971, which lowered the minimum voting age to 18 for all elections."
+      }, {
+        "title": "Heath v. Alabama",
+        "location": "474 U.S. 82 (1985)",
+        "text": "The Double Jeopardy Clause of the Fifth Amendment does not prohibit two different states from separately prosecuting and convicting the same individual for the same illegal act."
+      }, {
+        "title": "South Dakota v. Dole",
+        "location": "483 U.S. 203 (1987)",
+        "text": "Congress may attach reasonable conditions to funds disbursed to the states without violating the Tenth Amendment."
+      }, {
+        "title": "United States v. Lopez",
+        "location": "514 U.S. 549 (1995)",
+        "text": "The Gun-Free School Zones Act of 1990 is unconstitutional. The Commerce Clause of the Constitution does not give Congress the power to prohibit the mere possession of a gun near a school because gun possession by itself is not an economic activity that affects interstate commerce even indirectly."
+      }, {
+        "title": "U.S. Term Limits, Inc. v. Thornton",
+        "location": "514 U.S. 779 (1995)",
+        "text": "The states cannot create qualifications for prospective members of Congress that are stricter than those specified in the Constitution. This decision invalidates provisions that had imposed term limits on members of Congress in 23 states."
+      }, {
+        "title": "Printz v. United States",
+        "location": "521 U.S. 898 (1997)",
+        "text": "The interim provision of the Brady Handgun Violence Prevention Act that requires state and local officials to conduct background checks on firearm purchasers violates the Tenth Amendment."
+      }, {
+        "title": "Clinton v. City of New York",
+        "location": "524 U.S. 417 (1998)",
+        "text": "The Line Item Veto Act of 1996 is unconstitutional because it allows the President to amend or repeal parts of statutes without the pre-approval of Congress. According to the Presentment Clause of the Constitution, Congress must initiate all changes to existing laws."
+      }, {
+        "title": "United States v. Morrison",
+        "location": "529 U.S. 598 (2000)",
+        "text": "The section of the Violence Against Women Act of 1994 that gives victims of gender-motivated violence the right to sue their attackers in federal court is an unconstitutional intrusion on states' rights, and it cannot be saved by the Commerce Clause or Section 5 of the Fourteenth Amendment."
+      }, {
+        "title": "Gonzales v. Raich",
+        "location": "545 U.S. 1 (2005)",
+        "text": "Congress may ban the use of marijuana even in states that have approved its use for medicinal purposes."
+      }, {
+        "title": "Arizona v. United States",
+        "location": "567 U.S. ___ (2012)",
+        "text": "An Arizona law that authorizes local law enforcement to enforce immigration laws is preempted by federal law. Arizona law enforcement may inquire about a resident's legal status during lawful encounters, but the state may not implement its own immigration laws."
+      }, {
+        "title": "National Federation of Independent Business v. Sebelius",
+        "location": "567 U.S. ___ (2012)",
+        "text": "The Patient Protection and Affordable Care Act's expansion of Medicaid is unconstitutional as-written—it is unduly coercive to force the states to choose between participating in the expansion or forgoing all Medicaid funds. In addition, the individual health insurance mandate is constitutional by virtue of the Taxing and Spending Clause (though not by the Commerce Clause or the Necessary and Proper Clause)."
+      }]
+    }, {
+      "name": "First Amendment rights",
+      "cases": [{
+        "title": "Mutual Film Corp. v. Industrial Commission of Ohio",
+        "location": "236 U.S. 230 (1915)Overruled",
+        "text": "Motion pictures are not entitled to free speech protection because they are a business, not a form of art. ( by Joseph Burstyn, Inc. v. Wilson (1952))",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Schenck v. United States",
+        "location": "249 U.S. 47 (1919)",
+        "text": "Expressions in which the circumstances are intended to result in crime that poses a clear and present danger of succeeding can be punished without violating the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Gitlow v. New York",
+        "location": "268 U.S. 652 (1925)",
+        "text": "The provisions of the First Amendment that protect the freedom of speech and the freedom of the press apply to the governments of the states through the Due Process Clause of the Fourteenth Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Stromberg v. California",
+        "location": "283 U.S. 359 (1931)",
+        "text": "A California law that bans red flags is unconstitutional because it violates the First Amendment's protection of symbolic speech as applied to the states through the Fourteenth Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Near v. Minnesota",
+        "location": "283 U.S. 697 (1931)",
+        "text": "A Minnesota law that imposes prior restraints on the publication of \"malicious, scandalous, and defamatory\" content violates the First Amendment as applied to the states through the Fourteenth Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Chaplinsky v. New Hampshire",
+        "location": "315 U.S. 568 (1942)",
+        "text": "Fighting words—words that by their very utterance inflict injury or tend to incite an immediate breach of the peace—are not protected by the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Joseph Burstyn, Inc. v. Wilson",
+        "location": "343 U.S. 495 (1952)",
+        "text": "Motion pictures, as a form of artistic expression, are protected by the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Roth v. United States",
+        "location": "354 U.S. 476 (1957)Superseded",
+        "text": "Obscene material is not protected by the First Amendment. ( by Miller v. California (1973))",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "One, Inc. v. Olesen",
+        "location": "355 U.S. 371 (1958)",
+        "text": "Pro-homosexual writing is not per se obscene.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "New York Times Co. v. Sullivan",
+        "location": "376 U.S. 254 (1964)",
+        "text": "Public officials, to prove they were libelled, must show not only that a statement is false, but also that it was published with malicious intent.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Curtis Publishing Co. v. Butts",
+        "location": "388 U.S. 130 (1967)",
+        "text": "News organizations may be liable when printing allegations about public figures if the information they disseminate is recklessly gathered and unchecked.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "United States v. O'Brien",
+        "location": "391 U.S. 367 (1968)",
+        "text": "A criminal prohibition against draft-card burning does not violate the First Amendment because its effect on speech is only incidental, and it is justified by the significant governmental interest in maintaining an efficient and effective military draft system.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Tinker v. Des Moines Independent Community School District",
+        "location": "393 U.S. 503 (1969)",
+        "text": "Public school students have free speech rights under the First Amendment. Therefore, wearing armbands as a form of protest on public school grounds qualifies as protected symbolic speech.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Brandenburg v. Ohio",
+        "location": "395 U.S. 444 (1969)",
+        "text": "The mere advocacy of the use of force or of violation of the law is protected by the First Amendment. Only inciting others to take direct and immediate unlawful action is without constitutional protection.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Cohen v. California",
+        "location": "403 U.S. 15 (1971)",
+        "text": "The First Amendment prohibits the states from making the public display of a single four-letter expletive a criminal offense without a more specific and compelling reason than a general tendency to disturb the peace.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "New York Times Co. v. United States",
+        "location": "403 U.S. 713 (1971)",
+        "text": "The federal government's desire to keep the Pentagon Papers classified is not strong enough to justify violating the First Amendment by imposing prior restraints on the material.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Miller v. California",
+        "location": "413 U.S. 15 (1973)",
+        "text": "To be obscene, a work must fail the Miller test, which determines if it has any \"serious literary, artistic, political, or scientific value.\"",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Gertz v. Robert Welch, Inc.",
+        "location": "418 U.S. 323 (1974)",
+        "text": "The First Amendment permits the states to formulate their own standards of liability for defamation against private individuals as long as liability is not imposed without fault. If the state standard is lower than actual malice, then only actual damages may be awarded.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Buckley v. Valeo",
+        "location": "424 U.S. 1 (1976)",
+        "text": "Spending money to influence elections is a form of constitutionally protected free speech; therefore, federal limits on campaign contributions are constitutional in only a limited number of circumstances.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Federal Communications Commission v. Pacifica Foundation",
+        "location": "438 U.S. 726 (1978)",
+        "text": "Broadcasting has less First Amendment protection than other forms of communication because of its pervasive nature. The Federal Communications Commission has broad authority to determine what constitutes indecency in different contexts.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "New York v. Ferber",
+        "location": "458 U.S. 747 (1982)",
+        "text": "Laws that prohibit the sale, distribution, and advertisement of child pornography are constitutional even if the content does not meet the conditions necessary for it to be labeled obscene.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Bethel School District v. Fraser",
+        "location": "478 U.S. 675 (1986)",
+        "text": "The First Amendment permits a public school to punish a student for giving a lewd and indecent speech at a school assembly even if the speech is not obscene.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Hazelwood v. Kuhlmeier",
+        "location": "484 U.S. 260 (1988)",
+        "text": "Public school curricular student newspapers that have not been established as forums for student expression are subject to a lower level of First Amendment protection than independent student expression or newspapers established by policy or practice as forums for student expression.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Hustler Magazine v. Falwell",
+        "location": "485 U.S. 46 (1988)",
+        "text": "Parodies of public figures, including those intended to cause emotional distress, are protected by the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Texas v. Johnson",
+        "location": "491 U.S. 397 (1989)",
+        "text": "A Texas law that criminalizes the desecration of the American flag is unconstitutional because it violates the First Amendment's protection of symbolic speech. This decision invalidates laws prohibiting flag desecration in 48 of the 50 states—Alaska and Wyoming are the two exceptions.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Barnes v. Glen Theatre, Inc.",
+        "location": "501 U.S. 560 (1991)",
+        "text": "While nude dancing is a form of expressive conduct, public indecency laws regulating or prohibiting nude dancing are constitutional because they further substantial governmental interests in maintaining order and protecting morality.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Reno v. American Civil Liberties Union",
+        "location": "521 U.S. 844 (1997)",
+        "text": "The Communications Decency Act, which regulates certain content on the Internet, is so overbroad that it is an unconstitutional restraint on the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Citizens United v. Federal Election Commission",
+        "location": "558 U.S. 310 (2010)",
+        "text": "Limits on corporate and union political expenditures during election cycles violate the First Amendment. Corporations and labor unions can spend unlimited sums in support of or in opposition to candidates as long as the spending is independent of the candidates.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Snyder v. Phelps",
+        "location": "562 U.S. ___ (2011)",
+        "text": "The Westboro Baptist Church's picketing of funerals cannot be liable for a tort of emotional distress.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Brown v. Entertainment Merchants Association",
+        "location": "564 U.S. ___ (2011)",
+        "text": "Video games are a distinct communications medium protected by the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "McCutcheon v. Federal Election Commission",
+        "location": "572 U.S. ___ (2014)",
+        "text": "Limits on the total amounts of money that individuals can donate to political campaigns during two-year election cycles violate the First Amendment.",
+        "subgroup": "Freedom of speech and of the press"
+      }, {
+        "title": "Reynolds v. United States",
+        "location": "98 U.S. 145 (1879)",
+        "text": "Religious belief or duty cannot be used as a defense against a criminal indictment.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Davis v. Beason",
+        "location": "133 U.S. 333 (1890)",
+        "text": "The Edmunds Anti-Polygamy Act of 1882 does not violate the Free Exercise Clause of the First Amendment even though polygamy is part of several religious beliefs.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Cantwell v. Connecticut",
+        "location": "310 U.S. 296 (1940)",
+        "text": "The states cannot interfere with the free exercise of religion.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Minersville School District v. Gobitis",
+        "location": "310 U.S. 586 (1940)Overruled",
+        "text": "The First Amendment does not require public schools to excuse students from saluting the American flag and reciting the Pledge of Allegiance on religious grounds. ( by West Virginia State Board of Education v. Barnette (1943))",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Murdock v. Pennsylvania",
+        "location": "319 U.S. 105 (1943)",
+        "text": "A Pennsylvania ordinance that imposes a license tax on those selling religious merchandise violates the Free Exercise Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "West Virginia State Board of Education v. Barnette",
+        "location": "319 U.S. 624 (1943)",
+        "text": "Public schools cannot override the religious beliefs of their students by forcing them to salute the American flag and recite the Pledge of Allegiance.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Everson v. Board of Education",
+        "location": "330 U.S. 1 (1947)",
+        "text": "A state law that reimburses the costs of transportation to and from parochial schools does not violate the Establishment Clause of the First Amendment. The Establishment Clause is incorporated against the states, and the Constitution requires a sharp separation between government and religion.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "McCollum v. Board of Education",
+        "location": "333 U.S. 203 (1948)",
+        "text": "The use of public school facilities by religious organizations to give religious instruction to school children violates the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Engel v. Vitale",
+        "location": "370 U.S. 421 (1962)",
+        "text": "Government-directed prayer in public schools, even if it is denominationally neutral and non-mandatory, violates the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Abington School District v. Schempp",
+        "location": "374 U.S. 203 (1963)",
+        "text": "School-sponsored reading of the Bible and recitation of the Lord's Prayer in public schools is unconstitutional under the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Flast v. Cohen",
+        "location": "392 U.S. 83 (1968)",
+        "text": "Taxpayers have standing to sue to prevent the disbursement of federal funds in contravention of the specific constitutional prohibition against government support of religion.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Lemon v. Kurtzman",
+        "location": "403 U.S. 602 (1971)",
+        "text": "For a law to be considered constitutional under the Establishment Clause, the law must have a legitimate secular purpose, must not have the primary effect of either advancing or inhibiting religion, and must not result in an excessive entanglement of government and religion.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Wisconsin v. Yoder",
+        "location": "406 U.S. 205 (1972)",
+        "text": "Parents may remove their children from public schools for religious reasons.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Marsh v. Chambers",
+        "location": "463 U.S. 783 (1983)",
+        "text": "A state legislature's practice of opening its sessions with a prayer offered by a state-supported chaplain does not violate the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Edwards v. Aguillard",
+        "location": "482 U.S. 578 (1987)",
+        "text": "Teaching creationism in public schools is unconstitutional.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Employment Division v. Smith",
+        "location": "494 U.S. 872 (1990)",
+        "text": "Neutral laws of general applicability do not violate the Free Exercise Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Lee v. Weisman",
+        "location": "505 U.S. 577 (1992)",
+        "text": "Including a clergy-led prayer within the events of a public school graduation ceremony violates the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Church of Lukumi Babalu Aye v. City of Hialeah",
+        "location": "508 U.S. 520 (1993)",
+        "text": "The government must show a compelling interest to pass a law that targets a religion's ritual (as opposed to a law that happens to burden the ritual but is not directed at it). Failing to show such an interest, the prohibition of animal sacrifice is a violation of the Free Exercise Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Rosenberger v. University of Virginia",
+        "location": "515 U.S. 819 (1995)",
+        "text": "A university cannot use student dues to fund secular groups while excluding religious groups.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Agostini v. Felton",
+        "location": "521 U.S. 203 (1997)",
+        "text": "Allowing public school teachers to teach at parochial schools does not violate the Establishment Clause as long as the material that is taught is secular and neutral in nature and no \"excessive entanglement\" between government and religion is apparent.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Santa Fe Independent School District v. Doe",
+        "location": "530 U.S. 290 (2000)",
+        "text": "Prayer in public schools that is initiated and led by students violates the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Zelman v. Simmons-Harris",
+        "location": "536 U.S. 639 (2002)",
+        "text": "A government program that provides tuition vouchers for students to attend a private or religious school of their parents' choosing is constitutional because the vouchers are neutral toward religion and, therefore, do not violate the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Kitzmiller v. Dover Area School District",
+        "location": "400 F. Supp. 2d 707 (M.D. Pa. 2005)",
+        "text": "Teaching intelligent design in public school biology classes violates the Establishment Clause because intelligent design is not science, and it \"cannot uncouple itself from its creationist, and thus religious, antecedents.\"",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Hosanna-Tabor Evangelical Lutheran Church and School v. Equal Employment Opportunity Commission",
+        "location": "565 U.S. ___ (2012)",
+        "text": "Ministers cannot sue their churches by claiming termination in violation of employment non-discrimination laws. The Establishment Clause forbids the appointing of ministers by the government; therefore, it cannot interfere with the freedom of religious groups to select their own ministers under the Free Exercise Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Town of Greece v. Galloway",
+        "location": "572 U.S. ___ (2014)",
+        "text": "A town council's practice of opening its sessions with a sectarian prayer does not violate the Establishment Clause.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "Burwell v. Hobby Lobby Stores, Inc.",
+        "location": "573 U.S. ___ (2014)",
+        "text": "Closely held, for-profit corporations have free exercise rights under the Religious Freedom Restoration Act of 1993. As applied to such corporations, the requirement of the Patient Protection and Affordable Care Act that employers provide their female employees with no-cost access to contraception violates the Religious Freedom Restoration Act.",
+        "subgroup": "Freedom of religion"
+      }, {
+        "title": "National Association for the Advancement of Colored People v. Alabama",
+        "location": "357 U.S. 449 (1958)",
+        "text": "The freedom to associate with organizations dedicated to the \"advancement of beliefs and ideas\" is an inseparable part of the Due Process Clause of the Fourteenth Amendment.",
+        "subgroup": "Freedom of association"
+      }, {
+        "title": "Hurley v. Irish-American Gay, Lesbian, and Bisexual Group of Boston",
+        "location": "515 U.S. 557 (1995)",
+        "text": "Private citizens organizing a public demonstration have the right to exclude groups whose message they disagree with from participating.",
+        "subgroup": "Freedom of association"
+      }, {
+        "title": "Boy Scouts of America v. Dale",
+        "location": "530 U.S. 640 (2000)",
+        "text": "Private organizations are allowed to choose their own membership and expel members based on their sexual orientation even if such discrimination would otherwise be prohibited by anti-discrimination legislation designed to protect minorities in public accommodations.",
+        "subgroup": "Freedom of association"
+      }, {
+        "title": "Edwards v. South Carolina",
+        "location": "372 U.S. 229 (1963)",
+        "text": "The Free Petition Clause extends to the states through the Due Process Clause of the Fourteenth Amendment.",
+        "subgroup": "Freedom of petition"
+      }, {
+        "title": "California Motor Transport Co. v. Trucking Unlimited",
+        "location": "404 U.S. 508 (1972)",
+        "text": "The Free Petition Clause encompasses petitions to all three branches of the federal government—the Congress, the executive including administrative agencies and the judiciary.",
+        "subgroup": "Freedom of petition"
+      }]
+    }, {
+      "name": "Second Amendment rights",
+      "cases": [{
+        "title": "United States v. Cruikshank",
+        "location": "92 U.S. 542 (1876)",
+        "text": "The Second Amendment has no purpose other than to restrict the powers of the federal government. It does not specifically grant private citizens the right to keep and bear arms because that right exists independent of the Constitution."
+      }, {
+        "title": "Presser v. Illinois",
+        "location": "116 U.S. 252 (1886)",
+        "text": "An Illinois law that prohibits common citizens from forming personal military organizations, performing drills, and parading is constitutional because such a law does not limit the personal right to keep and bear arms."
+      }, {
+        "title": "United States v. Miller",
+        "location": "307 U.S. 174 (1939)",
+        "text": "The federal government and the states can limit access to all weapons that do not have \"some reasonable relationship to the preservation or efficiency of a well regulated militia.\""
+      }, {
+        "title": "District of Columbia v. Heller",
+        "location": "554 U.S. 570 (2008)",
+        "text": "The Second Amendment protects an individual right to possess a firearm unconnected with service in a militia and to use it for traditionally lawful purposes such as self-defense within the home."
+      }, {
+        "title": "McDonald v. Chicago",
+        "location": "561 U.S. 742 (2010)",
+        "text": "The individual right to keep and bear arms for self-defense is fully applicable to the states through the Due Process Clause of the Fourteenth Amendment."
+      }]
+    }, {
+      "name": "Other areas",
+      "cases": [{
+        "title": "Dartmouth College v. Woodward",
+        "location": "17 U.S. 518 (1819)",
+        "text": "The Contract Clause of the Constitution applies to both public and private corporations."
+      }, {
+        "title": "Johnson v. M'Intosh",
+        "location": "21 U.S. 543 (1823)",
+        "text": "Private citizens cannot purchase lands from Native Americans."
+      }, {
+        "title": "Slaughter-House Cases",
+        "location": "83 U.S. 36 (1873)",
+        "text": "The Privileges or Immunities Clause of the Fourteenth Amendment applies to the benefits of federal United States citizenship but not to the benefits of state citizenship."
+      }, {
+        "title": "Allgeyer v. Louisiana",
+        "location": "165 U.S. 578 (1897)",
+        "text": "The liberty that is protected by the Due Process Clause of the Fourteenth Amendment includes economic liberty."
+      }, {
+        "title": "The Paquete Habana",
+        "location": "175 U.S. 677 (1900)",
+        "text": "Federal courts may look to customary international law because it is an integrated part of American law."
+      }, {
+        "title": "Lone Wolf v. Hitchcock",
+        "location": "187 U.S. 553 (1903)",
+        "text": "Congress may use its plenary power to unilaterally break treaty obligations between the United States and Native American tribes."
+      }, {
+        "title": "Lochner v. New York",
+        "location": "198 U.S. 45 (1905)",
+        "text": "The freedom of contract is implicit in the Due Process Clause of the Fourteenth Amendment."
+      }, {
+        "title": "Selective Draft Law Cases",
+        "location": "245 U.S. 366 (1918)",
+        "text": "The Selective Service Act of 1917 and, more generally, conscription do not violate the Thirteenth Amendment's prohibition of involuntary servitude or the First Amendment's protection of the freedom of thought."
+      }, {
+        "title": "Dillon v. Gloss",
+        "location": "256 U.S. 368 (1921)",
+        "text": "Congress may set a deadline for the ratification of a new constitutional amendment if it wishes to do so."
+      }, {
+        "title": "Village of Euclid v. Ambler Realty Co.",
+        "location": "272 U.S. 365 (1926)",
+        "text": "Zoning laws are not an unreasonable extension of local police power and do not have the character of arbitrary fiat."
+      }, {
+        "title": "Gregory v. Helvering",
+        "location": "293 U.S. 465 (1935)",
+        "text": "Taxpayers have the right to decrease the amount of their taxes or to avoid them altogether by means which the law permits. However, a business reorganization must have economic substance in order to affect tax liability."
+      }, {
+        "title": "Brown v. Mississippi",
+        "location": "297 U.S. 278 (1936)",
+        "text": "A defendant's confession that is extracted by police violence cannot be entered as evidence and violates the Due Process Clause."
+      }, {
+        "title": "United States v. Curtiss-Wright Export Corp.",
+        "location": "299 U.S. 304 (1936)",
+        "text": "The Constitution implies that the ability to conduct foreign policy is vested entirely in the President. The President has plenary power in the foreign affairs field that does not depend on congressional delegation."
+      }, {
+        "title": "West Coast Hotel Co. v. Parrish",
+        "location": "300 U.S. 379 (1937)",
+        "text": "Minimum wage legislation is a valid regulation of the freedom of contract."
+      }, {
+        "title": "Erie Railroad Co. v. Tompkins",
+        "location": "304 U.S. 64 (1938)",
+        "text": "Federal courts in diversity jurisdiction cases must apply the law of the states in which they sit, including the judicial doctrine of the state's highest court, where it does not conflict with federal law. There is no general federal common law."
+      }, {
+        "title": "Coleman v. Miller",
+        "location": "307 U.S. 433 (1939)",
+        "text": "A proposed amendment to the Constitution is considered pending before the states indefinitely unless Congress establishes a deadline by which the states must act. Furthermore, Congress—not the courts—is responsible for deciding whether an amendment has been validly ratified."
+      }, {
+        "title": "International Shoe Co. v. Washington",
+        "location": "326 U.S. 310 (1945)",
+        "text": "Minimum contacts with the forum state can enable a court in that state to exert personal jurisdiction over a party consistent with the Due Process Clause."
+      }, {
+        "title": "Youngstown Sheet & Tube Co. v. Sawyer",
+        "location": "343 U.S. 579 (1952)",
+        "text": "The President cannot seize private property in the absence of either specifically enumerated authority under the Constitution or statutory authority given to him or her by Congress."
+      }, {
+        "title": "Reid v. Covert",
+        "location": "354 U.S. 1 (1957)",
+        "text": "The Constitution supersedes all treaties ratified by the Senate."
+      }, {
+        "title": "Williams v. Lee",
+        "location": "358 U.S. 217 (1959)",
+        "text": "State courts do not have jurisdiction on Indian reservations without the authorization of Congress."
+      }, {
+        "title": "Baker v. Carr",
+        "location": "369 U.S. 186 (1962)",
+        "text": "The redistricting of state legislative districts is not a political question, so it is justiciable by the federal courts."
+      }, {
+        "title": "Wesberry v. Sanders",
+        "location": "376 U.S. 1 (1964)",
+        "text": "The Constitution requires that the members of the House of Representatives be selected from districts composed, as nearly as is practicable, of equal population."
+      }, {
+        "title": "Reynolds v. Sims",
+        "location": "377 U.S. 533 (1964)",
+        "text": "The populations of state legislative districts must be as equal as mathematically possible so as to ensure equal protection."
+      }, {
+        "title": "Harper v. Virginia State Board of Elections",
+        "location": "383 U.S. 663 (1966)",
+        "text": "A state's conditioning of the right to vote on the payment of a fee or tax violates the Equal Protection Clause of the Fourteenth Amendment."
+      }, {
+        "title": "Menominee Tribe v. United States",
+        "location": "391 U.S. 404 (1968)",
+        "text": "Native American treaty rights are not repealed without a clear and unequivocal statement to that effect from Congress."
+      }, {
+        "title": "Goldberg v. Kelly",
+        "location": "397 U.S. 254 (1970)",
+        "text": "The termination of welfare benefits must be preceded by a full evidentiary hearing under the Due Process Clause."
+      }, {
+        "title": "Gravel v. United States",
+        "location": "408 U.S. 606 (1972)",
+        "text": "The privileges of the Constitution's Speech or Debate Clause enjoyed by members of Congress also extend to Congressional aides, but not to activity outside the legislative process."
+      }, {
+        "title": "San Antonio Independent School District v. Rodriguez",
+        "location": "411 U.S. 1 (1973)",
+        "text": "The use of property taxes to finance public education does not violate the Equal Protection Clause."
+      }, {
+        "title": "Oneida Indian Nation of New York v. County of Oneida",
+        "location": "414 U.S. 661 (1974)",
+        "text": "There is federal subject-matter jurisdiction for possessory land claims brought by Indian tribes based upon aboriginal title, the Nonintercourse Act, and Indian treaties."
+      }, {
+        "title": "United States v. Nixon",
+        "location": "418 U.S. 683 (1974)",
+        "text": "The doctrine of executive privilege is legitimate; however, the President cannot invoke it in criminal cases to withhold evidence."
+      }, {
+        "title": "Mathews v. Eldridge",
+        "location": "424 U.S. 319 (1976)",
+        "text": "When procedural due process applies, courts must consider the government's interests, the individual's interests, and the likelihood of making an inaccurate decision using the existing procedures as well as the probable value of additional procedural safeguards."
+      }, {
+        "title": "Nixon v. General Services Administration",
+        "location": "433 U.S. 425 (1977)",
+        "text": "Congress has the power to pass a law that directs the seizure and disposition of the papers and tapes of a former president that are within the control of the executive branch."
+      }, {
+        "title": "Sony Corp. of America v. Universal City Studios, Inc.",
+        "location": "464 U.S. 417 (1984)",
+        "text": "Manufacturers of home video recording machines cannot be liable for contributory copyright infringement for the potential uses by their purchasers because the devices are sold for legitimate purposes and have substantial non-infringing uses. Personal use of the machines to record broadcast television programs for later viewing constitutes fair use."
+      }, {
+        "title": "Chevron U.S.A., Inc. v. Natural Resources Defense Council, Inc.",
+        "location": "467 U.S. 837 (1984)",
+        "text": "A government agency's interpretation of its own mandate from Congress is entitled to judicial deference if the authority is ambiguous and the agency's interpretation is reasonable."
+      }, {
+        "title": "Selle v. Gibb",
+        "location": "741 F. 2d 896 (7th Cir. 1984)",
+        "text": "Substantial similarity is not enough in the absence of proof of access. Evidence of access must extend beyond mere speculation."
+      }, {
+        "title": "Feist Publications, Inc. v. Rural Telephone Service Company, Inc.",
+        "location": "499 U.S. 340 (1991)",
+        "text": "Originality, not sweat of the brow, is required for a work to obtain copyright protection."
+      }, {
+        "title": "Daubert v. Merrell Dow Pharmaceuticals",
+        "location": "509 U.S. 579 (1993)",
+        "text": "Scientific evidence that is admitted in federal court must be valid and relevant to the case at hand."
+      }, {
+        "title": "Dolan v. City of Tigard",
+        "location": "512 U.S. 374 (1994)",
+        "text": "A government agency may not take property in exchange for benefits that are unrelated to the agency's interest in the property."
+      }, {
+        "title": "Clinton v. Jones",
+        "location": "520 U.S. 681 (1997)",
+        "text": "The President has no immunity that could require civil law litigation against him or her involving a dispute unrelated to the office of President to be stayed until the end of his or her term. Such a delay would deprive the parties to the suit of the right to a speedy trial that is guaranteed by the Sixth Amendment."
+      }, {
+        "title": "Bush v. Gore",
+        "location": "531 U.S. 98 (2000)",
+        "text": "The recount of ballots in Florida during the 2000 presidential election violated the Equal Protection Clause because different standards of counting were used in the counties that were subjected to the recount. This decision effectively resolved the election in favor of the Republican nominee, George W. Bush."
+      }, {
+        "title": "Kelo v. City of New London",
+        "location": "545 U.S. 469 (2005)",
+        "text": "Local governments may seize property for economic development purposes."
+      }, {
+        "title": "Massachusetts v. Environmental Protection Agency",
+        "location": "549 U.S. 497 (2007)",
+        "text": "Greenhouse gases are air pollutants, and the Environmental Protection Agency may regulate their emission under the Clean Air Act."
+      }, {
+        "title": "Medellín v. Texas",
+        "location": "552 U.S. 491 (2008)",
+        "text": "International treaties are not binding domestic law unless Congress enacts statutes implementing them or unless the treaties are self-executing. Also, decisions of the International Court of Justice are not binding domestic law, and without authority from Congress or the Constitution, the President lacks the power to enforce international treaties or decisions of the International Court of Justice."
+      }, {
+        "title": "Association for Molecular Pathology v. Myriad Genetics, Inc.",
+        "location": "569 U.S. ___ (2013)",
+        "text": "Naturally occurring DNA sequences, even when isolated from the body, cannot be patented, but artificially created DNA is patent eligible because it is not naturally occurring."
+      }]
+    }]
+  </script>
+  <script>
+    var utterance = window.SpeechSynthesisUtterance;
+    var voice = window.speechSynthesis;
+    var cases = [];
+    var sample = 5;
+    var prevcases = [];
+
+    function addCases() {
+      while (cases.length < sample) {
+        var topic = _.clone(allcases[~~(Math.random() * allcases.length)]);
+        var mycase = topic.cases[~~(Math.random() * topic.cases.length)];
+        topic.cases = [mycase];
+        if (cases.indexOf(topic) == -1 && prevcases.indexOf(topic) == -1) {
+          console.log(mycase.title)
+          cases.push(topic);
+        }
+      }
+    }
+
+    addCases();
+    console.log(cases);
+    var msg = {};
+
+    window.topicsubtopiccase = function() {
+      $('#testbtn').effect('highlight');
+      msg.onend = _.noop;
+      var intros = ['Case Category:', 'Case Name:', 'Description:'];
+      var topic = cases[~~(Math.random() * cases.length)];
+      var topicName = topic.name;
+      topic = topic.cases[~~(Math.random() * topic.cases.length)];
+      var caseName = topic.title;
+      if (topic.text.length > 250) {
+        var descrip = [];
+        (function addBlock() {
+
+          var prevIndex = descrip.reduce(function(p, c, i) {
+            return p + c.length;
+          }, 0);
+
+          var index = prevIndex + 250;
+
+          if (index > topic.text.length) {
+            descrip.push(topic.text.slice(prevIndex));
+            return;
+          }
+
+          while (topic.text[index] != ' ' && index > 0) {
+            index -= 1
+          };
+
+          descrip.push(topic.text.slice(prevIndex, index));
+          addBlock();
+        })();
+
+      } else {
+        var descrip = [topic.text];
+      }
+
+      var regExp = /\(([^)]+)\)/;
+      var year = regExp.exec(topic.location)[0];
+      speechSynthesis.cancel();
+      msg = new utterance([year, intros[1], caseName, intros[0], topicName, 'again', caseName, year].join('... '));
+      msg.voice = voice.getVoices()[1];
+      msg.lang = 'en-US';
+
+      setTimeout(function() {
+        msg.voice = voice.getVoices()[1];
+        speechSynthesis.speak(msg);
+
+        var d = $('<p>').html(['<strong>', caseName, year, '</strong>:', topic.text].join(' ')).hide();
+        $('#output').append(d);
+        d.show('drop', 1000)
+
+        var n = 0;
+        msg.onend = function descripSpeak() {
+          msg = new utterance([descrip[n]].join('... '));
+          setTimeout(function() {
+            msg.voice = voice.getVoices()[1];
+            speechSynthesis.speak(msg);
+            msg.onend = function() {
+              if (n < descrip.length - 1) {
+                n += 1;
+                descripSpeak();
+                return;
+              }
+              msg = new utterance('That case was: ' + caseName + '... and happend in...' + year);
+              setTimeout(function() {
+                msg.rate = 0.8;
+                msg.voice = voice.getVoices()[1];
+                speechSynthesis.speak(msg);
+                msg.onend = function() {
+                  topicsubtopiccase();
+                };
+              }, 1000);
+            }
+          }, 0);
+        }
+      });
+    }
+
+    topicsubtopiccase();
+
+    function endtest() {
+      addCases();
+      $('#output').empty().show();
+      $('#tester').hide();
+      topicsubtopiccase();
+
+    };
+
+    function test() {
+      speechSynthesis.pause();
+      speechSynthesis.cancel();
+      msg.onend = _.noop;
+      $('#output').empty();
+      $('#tester').show();
+      $('#names, #descrips').empty();
+      var tries = 0;
+
+      cases.forEach(function(v, i) {
+        var tt = $('<div class="btn btn-default btn-block">').data('correct', i).text(v.cases[0].title).draggable({
+          revert: true
+        })
+
+        var dd = $('<div class="well">').text(v.cases[0].text).droppable({
+          drop: function(event, ui) {
+            tries += 1;
+            if (ui.draggable.data('correct') == i) {
+              prevcases.push(v);
+              cases = _(cases).without(v);
+              console.log('removed',cases);
+              $(this).effect('highlight').hide(1000);
+              ui.draggable.effect('highlight').hide(1000);
+            } else {
+
+              ui.draggable.css({
+                backgroundColor: 'red',
+                color: 'white'
+              }).draggable("disable");
+            }
+
+            if (tries == sample) {
+              $('#tester').hide('puff', 1000);
+              setTimeout(endtest, 1000);
+            }
+          }
+        })
+
+        Math.random() > 0.5? $('#names').append(tt) : $('#names').prepend(tt);
+        Math.random() > 0.5? $('#descrips').append(dd) : $('#descrips').prepend(dd);
+
+      })
+    }
+  </script>
+</body>
+
+</html>
